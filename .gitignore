@@ -1,0 +1,7 @@
+hub/
+ckpt/
+data/
+download/
+tv360/
+__pycache__/
+*.pyc
