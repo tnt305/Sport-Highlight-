@@ -52,10 +52,7 @@ class TwoWayLoss(nn.Module):
 
 class AsymmetricLossOptimized(nn.Module):
     ''' Notice - optimized version, minimizes memory allocation and gpu uploading,
-    favors inplace operations
-    
-    Result of AsymetricLoss with gamma_neg=4, gamma_pos=1 = 46.71
-    '''
+    favors inplace operations'''
 
     def __init__(self, gamma_neg=4, gamma_pos=1, clip=0.05, eps=1e-8, disable_torch_grad_focal_loss=False):
         super(AsymmetricLossOptimized, self).__init__()
@@ -95,13 +92,13 @@ class AsymmetricLossOptimized(nn.Module):
         # Asymmetric Focusing
         if self.gamma_neg > 0 or self.gamma_pos > 0:
             if self.disable_torch_grad_focal_loss:
-                torch._C.set_grad_enabled(False)
+                torch.set_grad_enabled(False)
             self.xs_pos = self.xs_pos * self.targets
             self.xs_neg = self.xs_neg * self.anti_targets
             self.asymmetric_w = torch.pow(1 - self.xs_pos - self.xs_neg,
                                           self.gamma_pos * self.targets + self.gamma_neg * self.anti_targets)
             if self.disable_torch_grad_focal_loss:
-                torch._C.set_grad_enabled(True)
+                torch.set_grad_enabled(True)
             self.loss *= self.asymmetric_w
 
         return -self.loss.sum()
@@ -150,7 +147,7 @@ class CalibratedRankingLoss(nn.Module):
         return total_loss
 
 class CorrelationAwareLoss(nn.Module):
-    def __init__(self, cooccur_matrix, base_loss=nn.BCEWithLogitsLoss(), alpha=0.3):
+    def __init__(self, cooccur_matrix, base_loss=CalibratedRankingLoss(), alpha=0.2):
         super().__init__()
         self.base_loss = base_loss
         self.alpha = alpha
@@ -167,3 +164,37 @@ class CorrelationAwareLoss(nn.Module):
         
         return loss + self.alpha * correlation_loss
 
+class MultiLabelCCE(nn.Module):
+    '''
+    Multi Label CCE
+    '''
+    def __init__(self, normalization=False, reduction='mean'):
+        super(MultiLabelCCE, self).__init__()
+        self.normalization = normalization
+        self.reduction = reduction
+
+    def forward(self, inputs, targets):
+        """
+        Cross entropy of multi-label classification
+        Note：The shapes of y_true and y_pred are consistent, and the elements of y_true are either 0 or 1. 1 indicates
+        that the corresponding class is a target class, and 0 indicates that the corresponding class is a non-target class.
+        """
+        if self.normalization:
+            y_pred = torch.softmax(inputs, dim=-1)
+        else:
+            y_pred = inputs
+        y_true = targets
+        y_pred = (1 - 2 * y_true) * y_pred
+        y_pred_neg = y_pred - y_true * 1e12
+        y_pred_pos = y_pred - (1 - y_true) * 1e12
+        zeros = torch.zeros_like(y_pred[..., :1])
+        y_pred_neg = torch.cat((y_pred_neg, zeros), axis=-1)
+        y_pred_pos = torch.cat((y_pred_pos, zeros), axis=-1)
+        neg_loss = torch.logsumexp(y_pred_neg,  axis=-1)
+        pos_loss = torch.logsumexp(y_pred_pos,  axis=-1)
+        if self.reduction == 'mean':
+            return torch.mean(neg_loss + pos_loss)
+        elif self.reduction == 'sum':
+            return torch.sum(neg_loss + pos_loss)
+        else:
+            return neg_loss + pos_loss
