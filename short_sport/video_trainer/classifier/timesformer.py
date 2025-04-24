@@ -75,25 +75,26 @@ class TimeSformerGNN(nn.Module):
         )
         
         # Graph components
-        self.class_emb = nn.Parameter(torch.randn(num_classes, hidden_size))
+        self.class_emb = nn.Parameter(torch.randn(num_classes, hidden_size) * 0.02)
         self.register_buffer('cooccur_matrix', self._init_cooccur_matrix(train_loader))
         self.class_edge_index = self._build_class_graph()
         
         # GNN Networks
-        self.gnn_class = GATv2Conv(hidden_size, gnn_dim, heads=2, concat=True)
-        self.gnn_instance = GATv2Conv(hidden_size, gnn_dim, heads=2, concat=True)
+        self.gnn_class = GATv2Conv(hidden_size, gnn_dim, heads=2, concat=True, dropout = 0.2)
+        self.gnn_instance = GATv2Conv(hidden_size, gnn_dim, heads=2, concat=True, dropout = 0.2)
         
         # Feature fusion
         if fusion_type == 'cross_attn':
             self.fusion = FeatureFusionWithCrossAttention(
                 query_dim=hidden_size,
                 context_dim=gnn_dim*2,  # *2 due to GAT concat
-                hidden_dim=hidden_size
+                hidden_dim=hidden_size,
+                dropout = 0.2
             )
         else:
             self.fusion = nn.Sequential(
                 nn.Linear(hidden_size + gnn_dim, hidden_size),
-                nn.ReLU()
+                nn.GELU()
             )
         
         # Classifier
@@ -222,10 +223,13 @@ class TimeSformerExecutor:
             {"params": self.model.parameters(), "lr": 0.0002, 'weight_decay': 0.01}
         ])
         
-        self.scheduler = get_cosine_schedule_with_warmup(
+        self.scheduler = self.scheduler = OneCycleLR(
             self.optimizer, 
-            num_warmup_steps=int(self.max_steps * 0.1),
-            num_training_steps=self.max_steps
+            max_lr=[0.00005, 0.0001],
+            total_steps=self.max_steps,
+            pct_start=0.1,
+            div_factor=25,
+            final_div_factor=1000
         )
         
         # Gradient scaler cho mixed precision

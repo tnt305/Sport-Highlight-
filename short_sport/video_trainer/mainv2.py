@@ -19,7 +19,7 @@ if project_root not in sys.path:
 from utils import read_config, AverageMeter
 from datasets.datamanager import DataManager
 from short_sport.video_trainer.architecture.sub_modules.matrix import compute_cooccurrence
-from losses.loss import BinaryFocalLoss, TwoWayLoss, AsymmetricLossOptimized, CalibratedRankingLoss, CorrelationAwareLoss
+from losses.loss import BinaryFocalLoss, TwoWayLoss, AsymmetricLossOptimized, CalibratedRankingLoss, CorrelationAwareLoss, MultiLabelCCE
 # import logging
 from logger import Logging
 # Set the PYTORCH_CUDA_ALLOC_CONF environment variable
@@ -179,7 +179,7 @@ def main(config, args):
         # Cấu hình loss
         if config['dataset']['name'] in ['tv360']:
             if config['training']['loss_function'] == 'asl':
-                criterion = AsymmetricLossOptimized()
+                criterion = AsymmetricLossOptimized(disable_torch_grad_focal_loss = False)
             elif config['training']['loss_function'] == '2wl':
                 criterion = TwoWayLoss()
             elif config['training']['loss_function'] == 'softmax_margin_w/o_weights':
@@ -189,6 +189,9 @@ def main(config, args):
             elif config['training']['loss_function'] == 'rank_bce':
                 cooccur = compute_cooccurrence(train_loader, len(class_list))
                 criterion = CorrelationAwareLoss(cooccur, base_loss=nn.BCEWithLogitsLoss(), alpha=0.3)
+            elif config['training']['loss_function'] == 'cce':
+                criterion = MultiLabelCCE()
+                
             else:
                 raise ValueError(f"Unsupported loss function '{config['training']['loss_function']}' for dataset '{config['dataset']['name']}'")
 
@@ -210,6 +213,9 @@ def main(config, args):
         if config['model']['name'] == 'timesformer':
             from classifier import TimeSformerExecutor
             executor = TimeSformerExecutor(*model_args)
+        if config['model']['name'] == 'timesformer_gnn':
+            from classifier import TimeSformerGNNExecutor
+            executor = TimeSformerGNNExecutor(*model_args)
         elif config['model']['name'] == 'videomae':
             from classifier import VideoMaeExecutor
             executor = VideoMaeExecutor(*model_args)
@@ -247,19 +253,19 @@ if __name__ == '__main__':
     parser.add_argument("--epoch_start", default=0, type=int, help="Epoch to start learning from, used when resuming")
     parser.add_argument("--epochs", default= 1, type=int, help="Total number of epochs")
     parser.add_argument("--dataset", default="tv360", help="Dataset: volleyball, hockey, charades, ava, animalkingdom")
-    parser.add_argument("--model", default="timesformer")
+    parser.add_argument("--model", default="timesformer_gnn")
     parser.add_argument("--total_length", default= 30,type=int, help="Number of frames in a video")
     parser.add_argument("--batch_size", default= 2,type=int, help="Size of the mini-batch")
     parser.add_argument("--max_steps", default= 6000,type=int, help="Number of frames in a video") 
     parser.add_argument("--gradient_accumulation_steps", default= 4,type=int, help="Number of frames in a video") 
     parser.add_argument("--id", default="", help="Additional string appended when saving the checkpoints")
     parser.add_argument("--checkpoint", default="", help="location of a checkpoint file, used to resume training")
-    parser.add_argument("--num_workers", default = 15, type=int, help="Number of torchvision workers used to load data (default: 8)")
+    parser.add_argument("--num_workers", default = 10, type=int, help="Number of torchvision workers used to load data (default: 8)")
     parser.add_argument("--test_every", default=1, type=int, help="Test the model every this number of epochs")
     parser.add_argument("--gpu", default="0", type=str, help="GPU id in case of multiple GPUs")
     parser.add_argument("--distributed", default=False, type=bool, help="Distributed training flag")
     parser.add_argument("--train", default=True, type=bool, help="train or test")
-    parser.add_argument("--loss_function", default = "rank_bce", help = "Los function")
+    parser.add_argument("--loss_function", default = "cce", help = "Los function")
     parser.add_argument("--config", default=None, help="Custom config file name (e.g., timesformer.yaml)")
     args = parser.parse_args()
     
