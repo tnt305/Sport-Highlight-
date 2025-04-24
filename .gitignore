@@ -2,6 +2,9 @@ hub/
 ckpt/
 data/
 download/
+mlruns/
+logs/
 tv360/
 __pycache__/
 *.pyc
+*.pth

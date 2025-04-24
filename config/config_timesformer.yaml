@@ -1,0 +1,94 @@
+dataset:
+  batch_size: 2
+  distributed: false
+  name: tv360
+  num_workers: 15
+  path: D:/projects/v2v/v5/data
+  seed: 1
+  test_transforms:
+  - GroupScale:
+      scale_size: 256
+  - GroupCenterCrop:
+      input_size: 224
+  - Stack:
+      roll: false
+  - ToTorchFormatTensor:
+      div: true
+  - GroupNormalize:
+      mean:
+      - 0.48145466
+      - 0.4578275
+      - 0.40821073
+      std:
+      - 0.26862954
+      - 0.26130258
+      - 0.27577711
+  train_transforms:
+  - GroupMultiScaleCrop:
+      input_size: 224
+      scales:
+      - 1
+      - 0.875
+      - 0.75
+      - 0.66
+  - GroupRandomHorizontalFlip:
+      is_sth: true
+  - GroupRandomColorJitter:
+      brightness: 0.4
+      contrast: 0.4
+      hue: 0.1
+      p: 0.8
+      saturation: 0.2
+  - GroupRandomGrayscale:
+      p: 0.2
+  - GroupGaussianBlur:
+      p: 0.0
+  - GroupSolarization:
+      p: 0.0
+  - Stack:
+      roll: false
+  - ToTorchFormatTensor:
+      div: true
+  - GroupNormalize:
+      mean:
+      - 0.48145466
+      - 0.4578275
+      - 0.40821073
+      std:
+      - 0.26862954
+      - 0.26130258
+      - 0.27577711
+logging:
+  level: INFO
+  log_file: ./logs/visual_trainer_{model}_{dataset}_{loss_function}.log
+mlops:
+  artifact_path: ./artifacts
+  experiment_name: timesformer_tv360
+  run_id: null
+  tracking_uri: file:./mlruns
+model:
+  gnn:
+    heads: 2
+    in_channels: 768
+    out_channels: 256
+  name: timesformer
+  num_classes: 18
+  pretrained: facebook/timesformer-hr-finetuned-k600
+  total_length: 30
+training:
+  distributed: false
+  epochs: 1
+  gpu: '0'
+  gradient_accumulation_steps: 4
+  loss_function: rank_bce
+  max_steps: 6000
+  optimizer:
+    lr: 1.0e-05
+    type: AdamW
+    weight_decay: 0.01
+  scheduler:
+    num_training_steps: 6000
+    num_warmup_steps: 600
+    type: cosine_with_warmup
+  seed: 1
+  test_every: 1
