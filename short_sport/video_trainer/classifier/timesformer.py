@@ -25,136 +25,156 @@ from short_sport.video_trainer.architecture.sub_modules.matrix import compute_co
 from scipy.sparse import csr_matrix
 from torch_geometric.nn import GATConv  # Cần cài đặt torch-geometric
 
-class SafeGATWrapper(nn.Module):
-    def __init__(self, in_channels, out_channels, heads):
+import torch
+import torch.nn as nn
+from transformers import TimesformerModel
+from torch_geometric.nn import GATv2Conv
+from torch_cluster import knn_graph
+import math
+
+class FeatureFusionWithCrossAttention(nn.Module):
+    def __init__(self,query_dim, context_dim, hidden_dim, num_heads=4, dropout=0.1):
         super().__init__()
-        self.gat = GATConv(in_channels, out_channels, heads=heads)
         
-        # Tắt biên dịch động cho lớp này
-        torch._dynamo.mark_dynamic(self.gat, 0)
+        self.query_proj = nn.Linear(query_dim, hidden_dim)
+        self.context_proj = nn.Linear(context_dim, hidden_dim)
+        
+        self.cross_attn = nn.MultiheadAttention(
+            embed_dim=hidden_dim,
+            num_heads=num_heads,
+            dropout=dropout,
+            batch_first=True
+        )
+        self.norm = nn.LayerNorm(hidden_dim)
+        self.dropout = nn.Dropout(dropout)
+        
+    def forward(self, query_features, context_features):
+        """
+        Args:
+            query_features: [batch_size, hidden_dim] (instance features)
+            context_features: [batch_size, context_dim] (GNN features)
+        """
+        q = self.query_proj(query_features).unsqueeze(1)  # [B, 1, D]
+        k = v = self.context_proj(context_features).unsqueeze(1)  # [B, 1, D]
+        
+        attn_output, _ = self.cross_attn(q, k, v)
+        return self.norm(query_features + self.dropout(attn_output.squeeze(1)))
 
-    def forward(self, x, edge_index):
-        # Thêm kiểm tra an toàn
-        if edge_index.numel() > 0:  # Kiểm tra edge_index không rỗng
-            assert edge_index.max() < x.size(0), "Edge index out of bounds"
-            return self.gat(x, edge_index)
-        else:
-            # Trả về tensor zeros nếu không có edge
-            return torch.zeros(x.size(0), self.gat.out_channels * self.gat.heads, device=x.device)
-
-
-class TimeSformer(nn.Module):
-    def __init__(self, num_frames, num_classes=18, train_loader=None):
+class TimeSformerGNN(nn.Module):
+    def __init__(self, num_frames, num_classes=18, train_loader=None, 
+                 hidden_size=768, gnn_dim=256, fusion_type='cross_attn'):
         super().__init__()
         self.num_classes = num_classes
-        # Khởi tạo backbone
-        self.backbone = TimesformerModel.from_pretrained("facebook/timesformer-hr-finetuned-k600",
-                                                        num_frames=num_frames,
-                                                        ignore_mismatched_sizes=True)
+        self.fusion_type = fusion_type
         
-        # Khởi tạo ma trận đồng xuất hiện và GNN
-        if train_loader is not None:
-            self.cooccur = self._compute_cooccurrence(train_loader, num_classes)
-            self.edge_index = self._create_graph_edges(num_classes)
-        else:
-            # Fallback khi không có train_loader
-            self.cooccur = torch.zeros((num_classes, num_classes))
-            self.edge_index = torch.zeros((2, 0), dtype=torch.long)
-        
-        hidden_size = self.backbone.config.hidden_size
-        self.gnn = SafeGATWrapper(hidden_size, 256, heads=2)
-        
-        # Classifier
-        self.classifier = nn.Sequential(
-            nn.LayerNorm(hidden_size + 256),
-            nn.Dropout(p=0.5),
-            nn.Linear(hidden_size+ 256, hidden_size//2),
-            nn.GELU(),
-            nn.Dropout(p=0.3),
-            nn.Linear(hidden_size//2, num_classes)
+        # Backbone initialization
+        self.backbone = TimesformerModel.from_pretrained(
+            "facebook/timesformer-hr-finetuned-k600",
+            num_frames=num_frames,
+            ignore_mismatched_sizes=True
         )
         
-        # Thêm temperature scaling cho hiệu chỉnh
-        self.temperature = nn.Parameter(torch.ones(1))
+        # Graph components
+        self.class_emb = nn.Parameter(torch.randn(num_classes, hidden_size))
+        self.register_buffer('cooccur_matrix', self._init_cooccur_matrix(train_loader))
+        self.class_edge_index = self._build_class_graph()
         
-        # Thêm dynamic thresholds
+        # GNN Networks
+        self.gnn_class = GATv2Conv(hidden_size, gnn_dim, heads=2, concat=True)
+        self.gnn_instance = GATv2Conv(hidden_size, gnn_dim, heads=2, concat=True)
+        
+        # Feature fusion
+        if fusion_type == 'cross_attn':
+            self.fusion = FeatureFusionWithCrossAttention(
+                query_dim=hidden_size,
+                context_dim=gnn_dim*2,  # *2 due to GAT concat
+                hidden_dim=hidden_size
+            )
+        else:
+            self.fusion = nn.Sequential(
+                nn.Linear(hidden_size + gnn_dim, hidden_size),
+                nn.ReLU()
+            )
+        
+        # Classifier
+        self.classifier = GroupWiseLinear(num_classes, hidden_size)
+        
+        # Dynamic parameters
+        self.temperature = nn.Parameter(torch.ones(1))
         self.register_buffer('thresholds', torch.ones(num_classes) * 0.5)
         
-        # Tắt biên dịch động cho forward
-        torch._dynamo.mark_dynamic(self, 0)
-    
-    def _compute_cooccurrence(self, loader, num_classes):
-        """Tính toán ma trận đồng xuất hiện từ dữ liệu"""
-        try:
-            return compute_cooccurrence(loader, num_classes)
-        except Exception as e:
-            print(f"Lỗi khi tính ma trận đồng xuất hiện: {e}")
-            return torch.zeros((num_classes, num_classes))
+        # Configuration
+        self.knn_k = 4  # For instance-level graph
 
-    def _create_graph_edges(self, num_classes):
-        """Tạo edge index với kiểm tra biên"""
+    def _init_cooccur_matrix(self, loader):
+        if loader is None:
+            return torch.zeros((self.num_classes, self.num_classes))
         try:
-            # Chuyển đổi sang tensor nếu là ma trận thưa
-            if isinstance(self.cooccur, csr_matrix):
-                rows, cols = self.cooccur.nonzero()
-            else:
-                rows, cols = self.cooccur.nonzero()
-                rows, cols = rows.cpu().numpy(), cols.cpu().numpy()
-            
-            if len(rows) == 0:
-                # Trả về tensor rỗng nếu không có cạnh
-                return torch.zeros((2, 0), dtype=torch.long)
-            
-            edge_index = torch.tensor([rows, cols], dtype=torch.long)
-            assert edge_index.max() < num_classes, "Edge index exceeds num_classes"
-            return edge_index
+            cooccur = compute_cooccurrence(loader, self.num_classes)
+            return torch.from_numpy(cooccur.toarray()) if isinstance(cooccur, csr_matrix) else cooccur
         except Exception as e:
-            print(f"Lỗi khi tạo edge index: {e}")
+            print(f"Co-occurrence matrix error: {e}")
+            return torch.zeros((self.num_classes, self.num_classes))
+
+    def _build_class_graph(self):
+        rows, cols = torch.where(self.cooccur_matrix > 0)
+        if len(rows) == 0:
             return torch.zeros((2, 0), dtype=torch.long)
+        return torch.stack([rows, cols], dim=0)
 
     def forward(self, x):
         # Feature extraction
-        outputs = self.backbone(x)
-        x = outputs[0][:, 0]  # [batch_size, hidden_size]
+        backbone_out = self.backbone(x)
+        instance_features = backbone_out.last_hidden_state[:, 0]  # [B, D]
         
-        # GNN processing với kiểm tra an toàn
-        batch_size = x.size(0)
+        # Class-level GNN
+        class_features = self.gnn_class(
+            self.class_emb.to(instance_features.device),
+            self.class_edge_index.to(instance_features.device)
+        )  # [num_classes, gnn_dim]
         
-        # Tạo batch nodes cho GNN (mỗi batch là một graph riêng)
-        batch_x = x.clone()  # [batch_size, hidden_size]
+        # Instance-level GNN
+        instance_edge_index = knn_graph(instance_features, k=self.knn_k, loop=True)
+        gnn_instance_features = self.gnn_instance(instance_features, instance_edge_index)
         
-        # Sử dụng edge_index đã được tạo trước
-        if self.edge_index.numel() > 0:
-            edge_index = self.edge_index.to(x.device)
-            
-            # Kiểm tra tính hợp lệ của edge_index
-            if edge_index.shape[1] > 0 and edge_index.max() < batch_size:
-                gnn_feat = self.gnn(batch_x, edge_index)
-                gnn_pooled = gnn_feat.mean(dim=0, keepdim=True).expand(batch_size, -1)
-            else:
-                # Fallback khi edge_index không hợp lệ
-                gnn_pooled = torch.zeros(batch_size, 256, device=x.device)
+        # Feature fusion
+        if self.fusion_type == 'cross_attn':
+            # Cross-attention between instance and class features
+            class_context = class_features.mean(0, keepdim=True).expand(instance_features.size(0), -1)
+            fused_features = self.fusion(instance_features, class_context + gnn_instance_features)
         else:
-            # Fallback khi không có edge
-            gnn_pooled = torch.zeros(batch_size, 256, device=x.device)
+            # Concatenation fusion
+            class_context = class_features.mean(0, keepdim=True).expand(instance_features.size(0), -1)
+            fused_features = self.fusion(
+                torch.cat([instance_features, class_context + gnn_instance_features], dim=-1)
+            )
+        # Classification
+        logits = self.classifier(fused_features.unsqueeze(1))
         
-        # Kết hợp features
-        combined = torch.cat([x, gnn_pooled], dim=1)
-        logits = self.classifier(combined)
-        
-        # Áp dụng temperature scaling trong quá trình inference
-        if not self.training:
-            logits = logits / self.temperature
-        
-        return logits
-    
-    def predict_with_threshold(self, x):
-        """Dự đoán với threshold động"""
-        with torch.no_grad():
-            logits = self(x)
-            probs = torch.sigmoid(logits)
-            preds = (probs > self.thresholds).float()
-            return preds, probs
+        # Temperature scaling
+        return logits / self.temperature if not self.training else logits
+
+class GroupWiseLinear(nn.Module):
+    def __init__(self, num_class, hidden_dim, bias=True):
+        super().__init__()
+        self.num_class = num_class
+        self.hidden_dim = hidden_dim
+        self.bias = bias
+
+        self.W = nn.Parameter(torch.Tensor(1, num_class, hidden_dim))
+        if bias:
+            self.b = nn.Parameter(torch.Tensor(1, num_class))
+        self.reset_parameters()
+
+    def reset_parameters(self):
+        stdv = 1. / math.sqrt(self.W.size(2))
+        self.W.data.uniform_(-stdv, stdv)
+        if self.bias:
+            self.b.data.uniform_(-stdv, stdv)
+
+    def forward(self, x):
+        # x: [B, 1, D]
+        return (self.W * x).sum(-1) + (self.b if self.bias else 0)
 
 class TimeSformerExecutor:
     def __init__(self, train_loader, valid_loader, test_loader, criterion, eval_metrics, 
@@ -186,7 +206,7 @@ class TimeSformerExecutor:
         num_frames = self.train_loader.dataset[0][0].shape[0]
         num_classes = len(class_list)
         
-        model = TimeSformer(num_frames=num_frames, num_classes=num_classes, train_loader=train_loader).to(self.gpu_id)
+        model = TimeSformerGNN(num_frames=num_frames, num_classes=num_classes, train_loader=train_loader).to(self.gpu_id)
         
         if distributed:
             self.model = DDP(model, device_ids=[gpu_id])
@@ -198,8 +218,8 @@ class TimeSformerExecutor:
             p.requires_grad = True
             
         # Optimizer và scheduler
-        self.optimizer = AdamW([
-            {"params": self.model.parameters(), "lr": 0.00001, 'weight_decay': 0.01}
+        self.optimizer = Adam([
+            {"params": self.model.parameters(), "lr": 0.0002, 'weight_decay': 0.01}
         ])
         
         self.scheduler = get_cosine_schedule_with_warmup(
@@ -273,12 +293,12 @@ class TimeSformerExecutor:
         self.global_step += 1
         
         # Validation định kỳ
-        if self.current_step % 500 == 0:
+        if self.current_step % 600 == 0:
             # Luôn validate và cập nhật thresholds
             self._validate()
             
             # Chỉ hiệu chỉnh temperature theo định kỳ ít hơn
-            if self.current_step % 2000 == 0 or self.current_step == 500:
+            if self.current_step % 2400 == 0 or self.current_step == 600:
                 print("Calibrating temperature...")
                 self._calibrate_temperature()
                 self.last_temp_calibration = self.current_step
@@ -313,7 +333,7 @@ class TimeSformerExecutor:
                 
                 # Update all metrics
                 for name, metric in self.eval_metrics.items():
-                    if name == 'accuracy':  # Xử lý riêng cho accuracy
+                    if name == 'weighted Accuracy':  # Xử lý riêng cho accuracy
                         metric_value = metric(preds, labels)
                     else:
                         try:
@@ -330,9 +350,9 @@ class TimeSformerExecutor:
             print(f"{name}: {value:.4f}")
         
         # Lưu best model
-        if current_metrics.get('average_precision', 0) > self.best_map:
+        if current_metrics.get('weighted v1 mAP', 0) > self.best_map:
             old_best = self.best_map
-            self.best_map = current_metrics['average_precision']
+            self.best_map = current_metrics['weighted v1 mAP']
             print(f"New best average_precision: {old_best:.4f} -> {self.best_map:.4f}")
             self.save(f'./models/best_model_step{self.current_step}.pth')
             print(f"Saved best model at step {self.current_step}")
@@ -436,67 +456,90 @@ class TimeSformerExecutor:
         return current_results
     
     def save(self, file_path="./models/checkpoint.pth"):
-        """Lưu checkpoint"""
+        """Lưu checkpoint hoàn chỉnh"""
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
-            
+        
         model = self.get_model()
         
         checkpoint = {
+            # Model states
             "backbone": model.backbone.state_dict(),
+            "gnn_class": model.gnn_class.state_dict(),
+            "gnn_instance": model.gnn_instance.state_dict(),
             "classifier": model.classifier.state_dict(),
-            "gnn": model.gnn.state_dict(),
-            "temperature": model.temperature.item(),
-            "thresholds": model.thresholds.cpu(),
+            "fusion": model.fusion.state_dict(),
+            "class_emb": model.class_emb.data,
+            "temperature": model.temperature.data,
+            "thresholds": model.thresholds.data,
+            
+            # Training states
             "optimizer": self.optimizer.state_dict(),
-            "scheduler": self.scheduler.state_dict(),
+            "scheduler": self.scheduler.state_dict() if self.scheduler else None,
+            "scaler": self.scaler.state_dict(),
+            
+            # Training progress
+            "current_step": self.current_step,
             "global_step": self.global_step,
-            "last_temp_calibration": self.last_temp_calibration
+            "best_metric": self.best_map,
+            "last_temp_calibration": self.last_temp_calibration,
         }
         
         torch.save(checkpoint, file_path)
-        print(f"Model saved to {file_path}")
-        
+        print(f"Checkpoint saved to {file_path} (step {self.current_step})")
+
     def load(self, file_path):
-        """Nạp checkpoint"""
+        """Nạp checkpoint hoàn chỉnh với xử lý tương thích ngược"""
         if not os.path.exists(file_path):
-            print(f"Checkpoint {file_path} không tồn tại!")
+            print(f"Warning: Checkpoint {file_path} not found!")
             return False
-            
+        
         checkpoint = torch.load(file_path, map_location=f"cuda:{self.gpu_id}")
         model = self.get_model()
         
-        # Nạp các thành phần của model
+        # 1. Load model parameters với xử lý tương thích
         model.backbone.load_state_dict(checkpoint["backbone"])
+        
+        # Xử lý cho GNN (tương thích cả version cũ và mới)
+        if "gnn" in checkpoint:  # Version cũ dùng chung 1 GNN
+            model.gnn_class.load_state_dict(checkpoint["gnn"])
+            model.gnn_instance.load_state_dict(checkpoint["gnn"])
+        else:  # Version mới tách riêng
+            model.gnn_class.load_state_dict(checkpoint["gnn_class"])
+            model.gnn_instance.load_state_dict(checkpoint["gnn_instance"])
+        
         model.classifier.load_state_dict(checkpoint["classifier"])
+        model.fusion.load_state_dict(checkpoint["fusion"])
         
-        # Nạp GNN nếu có
-        if "gnn" in checkpoint:
-            model.gnn.load_state_dict(checkpoint["gnn"])
+        # Load các parameter đặc biệt
+        with torch.no_grad():
+            model.class_emb.copy_(checkpoint["class_emb"])
+            if "temperature" in checkpoint:
+                model.temperature.copy_(checkpoint["temperature"])
+            else:
+                model.temperature.copy_(torch.tensor([1.0]).to(self.gpu_id))
+            
+            if "thresholds" in checkpoint:
+                model.thresholds.copy_(checkpoint["thresholds"])
+            else:
+                model.thresholds.copy_(torch.ones(model.num_classes, device=self.gpu_id) * 0.5)
         
-        # Nạp temperature nếu có
-        if "temperature" in checkpoint:
-            with torch.no_grad():
-                model.temperature.copy_(torch.tensor([checkpoint["temperature"]]).to(self.gpu_id))
-        
-        # Nạp thresholds nếu có
-        if "thresholds" in checkpoint:
-            model.thresholds.copy_(checkpoint["thresholds"].to(self.gpu_id))
-                
-        # Nạp optimizer và scheduler
+        # 2. Load training states
         self.optimizer.load_state_dict(checkpoint["optimizer"])
-        if "scheduler" in checkpoint:
-            self.scheduler.load_state_dict(checkpoint["scheduler"])
         
-        # Nạp global step
-        if "global_step" in checkpoint:
-            self.global_step = checkpoint["global_step"]
-            self.current_step = self.global_step
-            
-        # Nạp last_temp_calibration nếu có
-        if "last_temp_calibration" in checkpoint:
-            self.last_temp_calibration = checkpoint["last_temp_calibration"]
-            
-        print(f"Loaded checkpoint from {file_path} (step {self.global_step})")
+        if "scheduler" in checkpoint and checkpoint["scheduler"] is not None:
+            if self.scheduler:
+                self.scheduler.load_state_dict(checkpoint["scheduler"])
+        
+        if "scaler" in checkpoint:
+            self.scaler.load_state_dict(checkpoint["scaler"])
+        
+        # 3. Load training progress
+        self.current_step = checkpoint.get("current_step", 0)
+        self.global_step = checkpoint.get("global_step", self.current_step)
+        self.best_map = checkpoint.get("best_metric", 0.0)
+        self.last_temp_calibration = checkpoint.get("last_temp_calibration", 0)
+        
+        print(f"Loaded checkpoint from {file_path} (step {self.current_step})")
         return True
     
     def test(self):
@@ -525,7 +568,7 @@ class TimeSformerExecutor:
                 
                 # Update all metrics
                 for name, metric in self.eval_metrics.items():
-                    if name == 'accuracy':
+                    if name == 'weighted Accuracy':
                         metric_value = metric(preds, labels)
                     else:
                         metric_value = metric(outputs, labels)

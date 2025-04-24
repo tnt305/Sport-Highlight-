@@ -8,3 +8,4 @@ tv360/
 __pycache__/
 *.pyc
 *.pth
+*.whl
