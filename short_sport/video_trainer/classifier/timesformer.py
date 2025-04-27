@@ -98,6 +98,10 @@ class TimeSformerGNN(nn.Module):
             )
         
         # Classifier
+        self.pre_classifier = nn.Sequential(
+            nn.LayerNorm(hidden_size),
+            nn.Dropout(0.2)
+        )
         self.classifier = GroupWiseLinear(num_classes, hidden_size)
         
         # Dynamic parameters
