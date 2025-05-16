@@ -2,8 +2,12 @@ import torch
 import torch.nn as nn
 from collections import OrderedDict
 from timm.models.layers import DropPath
-from layer_norm import LayerNorm
-from activation import QuickGELU
+from torch.nn import MultiheadAttention
+import torch.utils.checkpoint as checkpoint
+
+from short_sport.video_trainer.architecture.models.uniformer_v2.layer_norm import LayerNorm
+from short_sport.video_trainer.architecture.models.uniformer_v2.activation import QuickGELU
+from short_sport.video_trainer.architecture.models.uniformer_v2.modules import Local_MHRA
 
 class ResidualAttentionBlock(nn.Module):
     def __init__(

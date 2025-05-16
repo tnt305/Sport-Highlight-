@@ -1,7 +1,7 @@
 import torch 
 import torch.nn as nn
-from layer_norm import LayerNorm
-from modules import Transformer
+from short_sport.video_trainer.architecture.models.uniformer_v2.layer_norm import LayerNorm
+from short_sport.video_trainer.architecture.models.uniformer_v2.attention import Transformer
 
 class VisionTransformer(nn.Module):
     def __init__(

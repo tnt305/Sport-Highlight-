@@ -1,6 +1,6 @@
 import torch
-from models.uniformer_v2.base_model import VisionTransformer
-from models.uniformer_v2.initializer import load_state_dict
+from short_sport.video_trainer.architecture.models.uniformer_v2.base_model import VisionTransformer
+from short_sport.video_trainer.architecture.models.uniformer_v2.initializer import load_state_dict
 
 def uniformerv2_b16(
     pretrained=True, use_checkpoint=False, checkpoint_num=[0],
@@ -38,15 +38,15 @@ def uniformerv2_b16(
         num_classes=num_classes,
     )
 
-    if pretrained:
-        print('load pretrained weights')
-        state_dict = torch.load(_MODELS["ViT-B/16"], map_location='cpu')
-        load_state_dict(model, state_dict)
-    return model.eval()
+    # if pretrained:
+    #     print('load pretrained weights')
+    #     state_dict = torch.load(_MODELS["ViT-B/16"], map_location='cpu')
+    #     load_state_dict(model, state_dict)
+    return model#.eval()
 
 
 def uniformerv2_l14(
-    pretrained=True, use_checkpoint=False, checkpoint_num=[0],
+    use_checkpoint=False, checkpoint_num=[0],
     t_size=16, dw_reduction=1.5, backbone_drop_path_rate=0., 
     temporal_downsample=True,
     no_lmhra=False, double_lmhra=True,
@@ -81,11 +81,11 @@ def uniformerv2_l14(
         num_classes=num_classes,
     )
 
-    if pretrained:
-        print('load pretrained weights')
-        state_dict = torch.load(_MODELS["ViT-L/14"], map_location='cpu')
-        load_state_dict(model, state_dict)
-    return model.eval()
+    # if pretrained:
+    #     print('load pretrained weights')
+    #     state_dict = torch.load(_MODELS["ViT-L/14"], map_location='cpu')
+    #     load_state_dict(model, state_dict)
+    return model #.eval()
 
 
 def uniformerv2_l14_336(
