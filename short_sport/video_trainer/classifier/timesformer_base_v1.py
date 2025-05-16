@@ -39,13 +39,8 @@ class TimeSformer(nn.Module):
         self.backbone = TimesformerModel.from_pretrained("facebook/timesformer-hr-finetuned-k600",
                                                         num_frames=num_frames,
                                                         ignore_mismatched_sizes=True)
-        self.classifier = self.classifier = nn.Sequential(
-            nn.LayerNorm(self.backbone.config.hidden_size),
-            nn.Dropout(p=0.5),
-            nn.Linear(self.backbone.config.hidden_size, 512),
-            nn.GELU(),
-            nn.Dropout(p=0.3),
-            nn.Linear(512, num_classes)
+        self.classifier = (
+            nn.Linear(768, num_classes)
         )
         self.temperature  = nn.Parameter(torch.ones(1))
     def forward(self, images):
@@ -71,7 +66,7 @@ class TimeSformerExecutor:
         num_classes = len(class_list)
         self.logger = logger or self._create_default_logger()  
         self.max_steps = max_steps
-        self.test_every_steps = int(round(self.max_steps / 10))
+        self.test_every_steps = int(round(self.max_steps / self.test_every))
         self.gradient_accumulation_steps = gradient_accumulation_steps
         self.global_step = 0
         logging.set_verbosity_error()
@@ -85,10 +80,10 @@ class TimeSformerExecutor:
         for p in self.model.backbone.parameters():
             p.requires_grad = True
             
-        self.optimizer = Adam([{"params": self.model.parameters(), "lr": 0.00005}])
+        self.optimizer = Adam([{"params": self.model.parameters(), "lr": 0.0001}])
         self.scheduler = get_cosine_schedule_with_warmup(
             self.optimizer, 
-            num_warmup_steps=int(self.max_steps * 0.2),
+            num_warmup_steps=int(self.max_steps * 0.1),
             num_training_steps=self.max_steps
         )
         self.scaler = GradScaler()
@@ -168,7 +163,7 @@ class TimeSformerExecutor:
             
         return loss_this.item() * self.gradient_accumulation_steps  # Return the unscaled loss for logging
         
-    def train(self, start_epoch, end_epoch):
+    def train(self):
         self.logger.info("Unfrozen backbone for Timesformer Training")
         for param in self.get_model().backbone.parameters():
             param.requires_grad = True
@@ -214,7 +209,7 @@ class TimeSformerExecutor:
                     pbar.update(1)
                     
                     # Detailed logging
-                    if self.global_step % 400 == 0:
+                    if self.global_step % 1000 == 0:
                         self.logger.info(f"Step {self.global_step}/{self.max_steps} - Loss: {loss_meter.avg:.4f} - LR: {current_lr:.6f}")
                 
                     # Periodic model evaluation
@@ -235,16 +230,16 @@ class TimeSformerExecutor:
                                 self.logger.info(f"[RAW] {metric_name}: {value * 100:.2f}")
                         
                         # 2. Perform temperature calibration
-                        self.logger.info("Performing temperature calibration...")
-                        optimal_temp = self.calibrate_temperature(self.valid_loader)
+                        # self.logger.info("Performing temperature calibration...")
+                        # optimal_temp = self.calibrate_temperature(self.valid_loader)
                         
                         # 3. Evaluate model after calibration
-                        self.logger.info(f"Evaluating model with calibration (temp={optimal_temp:.4f})...")
-                        metrics_values = self.test(apply_calibration=True)
+                        # self.logger.info(f"Evaluating model with calibration (temp={optimal_temp:.4f})...")
+                        # metrics_values = self.test(apply_calibration=True)
                         
-                        if (self.distributed and self.gpu_id == 0) or not self.distributed:
-                            for metric_name, value in metrics_values.items():
-                                self.logger.info(f"[CALIBRATED] {metric_name}: {value * 100:.2f}")
+                        # if (self.distributed and self.gpu_id == 0) or not self.distributed:
+                        #     for metric_name, value in metrics_values.items():
+                        #         self.logger.info(f"[CALIBRATED] {metric_name}: {value * 100:.2f}")
                         
                         # 4. Save checkpoint
                         self.save(f"./models/timesformer_step_{self.global_step}.pth")
