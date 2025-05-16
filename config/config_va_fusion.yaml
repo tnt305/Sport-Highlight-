@@ -2,7 +2,7 @@ dataset:
   batch_size: 2
   distributed: false
   name: tv360
-  num_workers: 10
+  num_workers: 15
   path: D:/projects/v2v/v5/data
   seed: 1
   test_transforms:
@@ -63,7 +63,7 @@ logging:
   log_file: ./logs/visual_trainer_{model}_{dataset}_{loss_function}.log
 mlops:
   artifact_path: ./artifacts
-  experiment_name: timesformer_tv360
+  experiment_name: va_fusion_tv360
   run_id: null
   tracking_uri: file:./mlruns
 model:
@@ -71,19 +71,19 @@ model:
     heads: 2
     in_channels: 768
     out_channels: 256
-  name: timesformer
+  name: va_fusion
   num_classes: 18
   pretrained: facebook/timesformer-hr-finetuned-k600
   total_length: 16
 training:
   distributed: false
-  epochs: 1
   gpu: '0'
   gradient_accumulation_steps: 4
-  loss_function: asl
+  loss_function: bce_with_logits
   max_steps: 12000
+  n_epochs: 3
   optimizer:
-    lr: 5.0e-05
+    lr: 1.0e-05
     type: Adam
   scheduler:
     num_training_steps: 12000

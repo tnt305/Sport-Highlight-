@@ -63,7 +63,7 @@ logging:
   log_file: ./logs/visual_trainer_{model}_{dataset}_{loss_function}.log
 mlops:
   artifact_path: ./artifacts
-  experiment_name: timesformer_tv360
+  experiment_name: timesformer_epoch_based_tv360
   run_id: null
   tracking_uri: file:./mlruns
 model:
@@ -71,9 +71,9 @@ model:
     heads: 2
     in_channels: 768
     out_channels: 256
-  name: timesformer
+  name: timesformer_epoch_based
   num_classes: 18
-  pretrained: facebook/timesformer-hr-finetuned-k600
+  pretrained: facebook/timesformer-based-finetuned-k600
   total_length: 16
 training:
   distributed: false
