@@ -1,0 +1,160 @@
+F:/video_classification/2014-11-05 - 22-45 Bayern Munich 2 - 0 AS Roma/chunk_49/chunk_49.mp3
+F:/video_classification/2014-11-05 - 22-45 Bayern Munich 2 - 0 AS Roma/chunk_67/chunk_67.mp3
+F:/video_classification/2014-11-05 - 22-45 Bayern Munich 2 - 0 AS Roma/chunk_78/chunk_78.mp3
+F:/video_classification/2014-11-05 - 22-45 Bayern Munich 2 - 0 AS Roma/chunk_79/chunk_79.mp3
+F:/video_classification/2014-11-05 - 22-45 Bayern Munich 2 - 0 AS Roma/chunk_90/chunk_90.mp3
+F:/video_classification/2015-08-22 - 16-30 Hoffenheim 1 - 2 Bayern Munich/chunk_2/chunk_2.mp3
+F:/video_classification/2015-08-22 - 16-30 Hoffenheim 1 - 2 Bayern Munich/chunk_18/chunk_18.mp3
+F:/video_classification/2015-08-22 - 16-30 Hoffenheim 1 - 2 Bayern Munich/chunk_19/chunk_19.mp3
+F:/video_classification/2015-08-22 - 16-30 Hoffenheim 1 - 2 Bayern Munich/chunk_41/chunk_41.mp3
+F:/video_classification/2015-08-22 - 16-30 Hoffenheim 1 - 2 Bayern Munich/chunk_51/chunk_51.mp3
+F:/video_classification/2015-08-22 - 16-30 Hoffenheim 1 - 2 Bayern Munich/chunk_59/chunk_59.mp3
+F:/video_classification/2015-08-22 - 16-30 Hoffenheim 1 - 2 Bayern Munich/chunk_69/chunk_69.mp3
+F:/video_classification/2015-08-22 - 16-30 Hoffenheim 1 - 2 Bayern Munich/chunk_70/chunk_70.mp3
+F:/video_classification/2015-10-04 - 21-30 Atl. Madrid 1 - 1 Real Madrid/chunk_6/chunk_6.mp3
+F:/video_classification/2015-10-04 - 21-30 Atl. Madrid 1 - 1 Real Madrid/chunk_10/chunk_10.mp3
+F:/video_classification/2015-10-04 - 21-30 Atl. Madrid 1 - 1 Real Madrid/chunk_15/chunk_15.mp3
+F:/video_classification/2015-10-04 - 21-30 Atl. Madrid 1 - 1 Real Madrid/chunk_16/chunk_16.mp3
+F:/video_classification/2015-10-04 - 21-30 Atl. Madrid 1 - 1 Real Madrid/chunk_18/chunk_18.mp3
+F:/video_classification/2015-10-04 - 21-30 Atl. Madrid 1 - 1 Real Madrid/chunk_25/chunk_25.mp3
+F:/video_classification/2015-10-04 - 21-30 Atl. Madrid 1 - 1 Real Madrid/chunk_27/chunk_27.mp3
+F:/video_classification/2015-10-04 - 21-30 Atl. Madrid 1 - 1 Real Madrid/chunk_28/chunk_28.mp3
+F:/video_classification/2015-10-04 - 21-30 Atl. Madrid 1 - 1 Real Madrid/chunk_33/chunk_33.mp3
+F:/video_classification/2015-10-04 - 21-30 Atl. Madrid 1 - 1 Real Madrid/chunk_39/chunk_39.mp3
+F:/video_classification/2015-10-04 - 21-30 Atl. Madrid 1 - 1 Real Madrid/chunk_40/chunk_40.mp3
+F:/video_classification/2015-10-04 - 21-30 Atl. Madrid 1 - 1 Real Madrid/chunk_42/chunk_42.mp3
+F:/video_classification/2015-10-04 - 21-30 Atl. Madrid 1 - 1 Real Madrid/chunk_48/chunk_48.mp3
+F:/video_classification/2015-10-04 - 21-30 Atl. Madrid 1 - 1 Real Madrid/chunk_78/chunk_78.mp3
+F:/video_classification/2015-10-04 - 21-30 Atl. Madrid 1 - 1 Real Madrid/chunk_79/chunk_79.mp3
+F:/video_classification/2015-10-04 - 21-30 Atl. Madrid 1 - 1 Real Madrid/chunk_83/chunk_83.mp3
+F:/video_classification/2015-10-04 - 21-30 Atl. Madrid 1 - 1 Real Madrid/chunk_88/chunk_88.mp3
+F:/video_classification/2015-11-29 - 15-00 Tottenham 0 - 0 Chelsea/chunk_25/chunk_25.mp3
+F:/video_classification/2015-11-29 - 15-00 Tottenham 0 - 0 Chelsea/chunk_41/chunk_41.mp3
+F:/video_classification/2015-11-29 - 15-00 Tottenham 0 - 0 Chelsea/chunk_48/chunk_48.mp3
+F:/video_classification/2015-11-29 - 15-00 Tottenham 0 - 0 Chelsea/chunk_49/chunk_49.mp3
+F:/video_classification/2015-11-29 - 15-00 Tottenham 0 - 0 Chelsea/chunk_55/chunk_55.mp3
+F:/video_classification/2015-11-29 - 15-00 Tottenham 0 - 0 Chelsea/chunk_94/chunk_94.mp3
+F:/video_classification/2015-11-29 - 15-00 Tottenham 0 - 0 Chelsea/chunk_95/chunk_95.mp3
+F:/video_classification/2015-11-29 - 18-00 Eibar 0 - 2 Real Madrid/chunk_4/chunk_4.mp3
+F:/video_classification/2015-11-29 - 18-00 Eibar 0 - 2 Real Madrid/chunk_17/chunk_17.mp3
+F:/video_classification/2015-11-29 - 18-00 Eibar 0 - 2 Real Madrid/chunk_20/chunk_20.mp3
+F:/video_classification/2015-11-29 - 18-00 Eibar 0 - 2 Real Madrid/chunk_21/chunk_21.mp3
+F:/video_classification/2015-11-29 - 18-00 Eibar 0 - 2 Real Madrid/chunk_25/chunk_25.mp3
+F:/video_classification/2015-11-29 - 18-00 Eibar 0 - 2 Real Madrid/chunk_36/chunk_36.mp3
+F:/video_classification/2015-11-29 - 18-00 Eibar 0 - 2 Real Madrid/chunk_42/chunk_42.mp3
+F:/video_classification/2015-11-29 - 18-00 Eibar 0 - 2 Real Madrid/chunk_43/chunk_43.mp3
+F:/video_classification/2015-11-29 - 18-00 Eibar 0 - 2 Real Madrid/chunk_44/chunk_44.mp3
+F:/video_classification/2015-12-09 - 22-45 D. Zagreb 0 - 2 Bayern Munich/chunk_3/chunk_3.mp3
+F:/video_classification/2015-12-09 - 22-45 D. Zagreb 0 - 2 Bayern Munich/chunk_10/chunk_10.mp3
+F:/video_classification/2015-12-09 - 22-45 D. Zagreb 0 - 2 Bayern Munich/chunk_11/chunk_11.mp3
+F:/video_classification/2015-12-09 - 22-45 D. Zagreb 0 - 2 Bayern Munich/chunk_27/chunk_27.mp3
+F:/video_classification/2015-12-09 - 22-45 D. Zagreb 0 - 2 Bayern Munich/chunk_28/chunk_28.mp3
+F:/video_classification/2015-12-09 - 22-45 D. Zagreb 0 - 2 Bayern Munich/chunk_31/chunk_31.mp3
+F:/video_classification/2015-12-09 - 22-45 D. Zagreb 0 - 2 Bayern Munich/chunk_39/chunk_39.mp3
+F:/video_classification/2015-12-09 - 22-45 D. Zagreb 0 - 2 Bayern Munich/chunk_41/chunk_41.mp3
+F:/video_classification/2015-12-09 - 22-45 D. Zagreb 0 - 2 Bayern Munich/chunk_45/chunk_45.mp3
+F:/video_classification/2015-12-09 - 22-45 D. Zagreb 0 - 2 Bayern Munich/chunk_48/chunk_48.mp3
+F:/video_classification/2015-12-09 - 22-45 D. Zagreb 0 - 2 Bayern Munich/chunk_49/chunk_49.mp3
+F:/video_classification/2015-12-09 - 22-45 D. Zagreb 0 - 2 Bayern Munich/chunk_58/chunk_58.mp3
+F:/video_classification/2015-12-09 - 22-45 D. Zagreb 0 - 2 Bayern Munich/chunk_60/chunk_60.mp3
+F:/video_classification/2015-12-09 - 22-45 D. Zagreb 0 - 2 Bayern Munich/chunk_63/chunk_63.mp3
+F:/video_classification/2015-12-09 - 22-45 D. Zagreb 0 - 2 Bayern Munich/chunk_75/chunk_75.mp3
+F:/video_classification/2015-12-09 - 22-45 D. Zagreb 0 - 2 Bayern Munich/chunk_81/chunk_81.mp3
+F:/video_classification/2015-12-09 - 22-45 D. Zagreb 0 - 2 Bayern Munich/chunk_83/chunk_83.mp3
+F:/video_classification/2015-12-09 - 22-45 D. Zagreb 0 - 2 Bayern Munich/chunk_84/chunk_84.mp3
+F:/video_classification/2015-12-12 - 17-30 Bayern Munich 2 - 0 Ingolstadt/chunk_1/chunk_1.mp3
+F:/video_classification/2015-12-12 - 17-30 Bayern Munich 2 - 0 Ingolstadt/chunk_3/chunk_3.mp3
+F:/video_classification/2015-12-12 - 17-30 Bayern Munich 2 - 0 Ingolstadt/chunk_14/chunk_14.mp3
+F:/video_classification/2015-12-12 - 17-30 Bayern Munich 2 - 0 Ingolstadt/chunk_25/chunk_25.mp3
+F:/video_classification/2015-12-12 - 17-30 Bayern Munich 2 - 0 Ingolstadt/chunk_30/chunk_30.mp3
+F:/video_classification/2015-12-12 - 17-30 Bayern Munich 2 - 0 Ingolstadt/chunk_31/chunk_31.mp3
+F:/video_classification/2015-12-12 - 17-30 Bayern Munich 2 - 0 Ingolstadt/chunk_48/chunk_48.mp3
+F:/video_classification/2015-12-12 - 17-30 Bayern Munich 2 - 0 Ingolstadt/chunk_51/chunk_51.mp3
+F:/video_classification/2015-12-12 - 17-30 Bayern Munich 2 - 0 Ingolstadt/chunk_60/chunk_60.mp3
+F:/video_classification/2015-12-12 - 17-30 Bayern Munich 2 - 0 Ingolstadt/chunk_69/chunk_69.mp3
+F:/video_classification/2015-12-12 - 17-30 Bayern Munich 2 - 0 Ingolstadt/chunk_75/chunk_75.mp3
+F:/video_classification/2015-12-12 - 17-30 Bayern Munich 2 - 0 Ingolstadt/chunk_88/chunk_88.mp3
+F:/video_classification/2015-12-26 - 18-00 Manchester City 4 - 1 Sunderland/chunk_5/chunk_5.mp3
+F:/video_classification/2015-12-26 - 18-00 Manchester City 4 - 1 Sunderland/chunk_6/chunk_6.mp3
+F:/video_classification/2015-12-26 - 18-00 Manchester City 4 - 1 Sunderland/chunk_12/chunk_12.mp3
+F:/video_classification/2015-12-26 - 18-00 Manchester City 4 - 1 Sunderland/chunk_16/chunk_16.mp3
+F:/video_classification/2015-12-26 - 18-00 Manchester City 4 - 1 Sunderland/chunk_27/chunk_27.mp3
+F:/video_classification/2015-12-26 - 18-00 Manchester City 4 - 1 Sunderland/chunk_34/chunk_34.mp3
+F:/video_classification/2015-12-26 - 18-00 Manchester City 4 - 1 Sunderland/chunk_35/chunk_35.mp3
+F:/video_classification/2015-12-26 - 18-00 Manchester City 4 - 1 Sunderland/chunk_36/chunk_36.mp3
+F:/video_classification/2015-12-26 - 18-00 Manchester City 4 - 1 Sunderland/chunk_46/chunk_46.mp3
+F:/video_classification/2015-12-26 - 18-00 Manchester City 4 - 1 Sunderland/chunk_51/chunk_51.mp3
+F:/video_classification/2015-12-26 - 18-00 Manchester City 4 - 1 Sunderland/chunk_56/chunk_56.mp3
+F:/video_classification/2015-12-26 - 18-00 Manchester City 4 - 1 Sunderland/chunk_83/chunk_83.mp3
+F:/video_classification/2016-01-24 - 22-30 Betis 1 - 1 Real Madrid/chunk_2/chunk_2.mp3
+F:/video_classification/2016-01-24 - 22-30 Betis 1 - 1 Real Madrid/chunk_15/chunk_15.mp3
+F:/video_classification/2016-01-24 - 22-30 Betis 1 - 1 Real Madrid/chunk_25/chunk_25.mp3
+F:/video_classification/2016-01-24 - 22-30 Betis 1 - 1 Real Madrid/chunk_26/chunk_26.mp3
+F:/video_classification/2016-01-24 - 22-30 Betis 1 - 1 Real Madrid/chunk_28/chunk_28.mp3
+F:/video_classification/2016-01-24 - 22-30 Betis 1 - 1 Real Madrid/chunk_35/chunk_35.mp3
+F:/video_classification/2016-01-24 - 22-30 Betis 1 - 1 Real Madrid/chunk_53/chunk_53.mp3
+F:/video_classification/2016-01-24 - 22-30 Betis 1 - 1 Real Madrid/chunk_56/chunk_56.mp3
+F:/video_classification/2016-01-24 - 22-30 Betis 1 - 1 Real Madrid/chunk_57/chunk_57.mp3
+F:/video_classification/2016-01-24 - 22-30 Betis 1 - 1 Real Madrid/chunk_60/chunk_60.mp3
+F:/video_classification/2016-01-24 - 22-30 Betis 1 - 1 Real Madrid/chunk_64/chunk_64.mp3
+F:/video_classification/2016-01-24 - 22-30 Betis 1 - 1 Real Madrid/chunk_73/chunk_73.mp3
+F:/video_classification/2016-01-24 - 22-30 Betis 1 - 1 Real Madrid/chunk_77/chunk_77.mp3
+F:/video_classification/2016-01-31 - 22-30 Real Madrid 6 - 0 Espanyol/chunk_3/chunk_3.mp3
+F:/video_classification/2016-01-31 - 22-30 Real Madrid 6 - 0 Espanyol/chunk_5/chunk_5.mp3
+F:/video_classification/2016-01-31 - 22-30 Real Madrid 6 - 0 Espanyol/chunk_10/chunk_10.mp3
+F:/video_classification/2016-01-31 - 22-30 Real Madrid 6 - 0 Espanyol/chunk_18/chunk_18.mp3
+F:/video_classification/2016-01-31 - 22-30 Real Madrid 6 - 0 Espanyol/chunk_20/chunk_20.mp3
+F:/video_classification/2016-01-31 - 22-30 Real Madrid 6 - 0 Espanyol/chunk_21/chunk_21.mp3
+F:/video_classification/2016-01-31 - 22-30 Real Madrid 6 - 0 Espanyol/chunk_44/chunk_44.mp3
+F:/video_classification/2016-01-31 - 22-30 Real Madrid 6 - 0 Espanyol/chunk_59/chunk_59.mp3
+F:/video_classification/2016-01-31 - 22-30 Real Madrid 6 - 0 Espanyol/chunk_60/chunk_60.mp3
+F:/video_classification/2016-01-31 - 22-30 Real Madrid 6 - 0 Espanyol/chunk_74/chunk_74.mp3
+F:/video_classification/2016-01-31 - 22-30 Real Madrid 6 - 0 Espanyol/chunk_76/chunk_76.mp3
+F:/video_classification/2016-02-07 - 22-30 Granada CF 1 - 2 Real Madrid/chunk_8/chunk_8.mp3
+F:/video_classification/2016-02-07 - 22-30 Granada CF 1 - 2 Real Madrid/chunk_9/chunk_9.mp3
+F:/video_classification/2016-02-07 - 22-30 Granada CF 1 - 2 Real Madrid/chunk_22/chunk_22.mp3
+F:/video_classification/2016-02-07 - 22-30 Granada CF 1 - 2 Real Madrid/chunk_64/chunk_64.mp3
+F:/video_classification/2016-02-07 - 22-30 Granada CF 1 - 2 Real Madrid/chunk_65/chunk_65.mp3
+F:/video_classification/2016-02-21 - 18-00 Malaga 1 - 1 Real Madrid/chunk_1/chunk_1.mp3
+F:/video_classification/2016-02-21 - 18-00 Malaga 1 - 1 Real Madrid/chunk_3/chunk_3.mp3
+F:/video_classification/2016-02-21 - 18-00 Malaga 1 - 1 Real Madrid/chunk_36/chunk_36.mp3
+F:/video_classification/2016-02-21 - 18-00 Malaga 1 - 1 Real Madrid/chunk_38/chunk_38.mp3
+F:/video_classification/2016-02-21 - 18-00 Malaga 1 - 1 Real Madrid/chunk_44/chunk_44.mp3
+F:/video_classification/2016-02-21 - 18-00 Malaga 1 - 1 Real Madrid/chunk_49/chunk_49.mp3
+F:/video_classification/2016-02-21 - 18-00 Malaga 1 - 1 Real Madrid/chunk_58/chunk_58.mp3
+F:/video_classification/2016-02-21 - 18-00 Malaga 1 - 1 Real Madrid/chunk_61/chunk_61.mp3
+F:/video_classification/2016-02-21 - 18-00 Malaga 1 - 1 Real Madrid/chunk_64/chunk_64.mp3
+F:/video_classification/2016-02-21 - 18-00 Malaga 1 - 1 Real Madrid/chunk_73/chunk_73.mp3
+F:/video_classification/2016-02-21 - 18-00 Malaga 1 - 1 Real Madrid/chunk_81/chunk_81.mp3
+F:/video_classification/2016-03-05 - 18-00 Real Madrid 7 - 1 Celta Vigo/chunk_12/chunk_12.mp3
+F:/video_classification/2016-03-05 - 18-00 Real Madrid 7 - 1 Celta Vigo/chunk_14/chunk_14.mp3
+F:/video_classification/2016-03-05 - 18-00 Real Madrid 7 - 1 Celta Vigo/chunk_16/chunk_16.mp3
+F:/video_classification/2016-03-05 - 18-00 Real Madrid 7 - 1 Celta Vigo/chunk_22/chunk_22.mp3
+F:/video_classification/2016-03-05 - 18-00 Real Madrid 7 - 1 Celta Vigo/chunk_30/chunk_30.mp3
+F:/video_classification/2016-03-05 - 18-00 Real Madrid 7 - 1 Celta Vigo/chunk_35/chunk_35.mp3
+F:/video_classification/2016-03-05 - 18-00 Real Madrid 7 - 1 Celta Vigo/chunk_51/chunk_51.mp3
+F:/video_classification/2016-03-05 - 18-00 Real Madrid 7 - 1 Celta Vigo/chunk_65/chunk_65.mp3
+F:/video_classification/2016-03-05 - 18-00 Real Madrid 7 - 1 Celta Vigo/chunk_66/chunk_66.mp3
+F:/video_classification/2016-03-05 - 18-00 Real Madrid 7 - 1 Celta Vigo/chunk_67/chunk_67.mp3
+F:/video_classification/2016-03-05 - 18-00 Real Madrid 7 - 1 Celta Vigo/chunk_68/chunk_68.mp3
+F:/video_classification/2016-03-05 - 18-00 Real Madrid 7 - 1 Celta Vigo/chunk_82/chunk_82.mp3
+F:/video_classification/2016-03-13 - 22-30 Las Palmas 1 - 2 Real Madrid/chunk_2/chunk_2.mp3
+F:/video_classification/2016-03-13 - 22-30 Las Palmas 1 - 2 Real Madrid/chunk_9/chunk_9.mp3
+F:/video_classification/2016-03-13 - 22-30 Las Palmas 1 - 2 Real Madrid/chunk_13/chunk_13.mp3
+F:/video_classification/2016-03-13 - 22-30 Las Palmas 1 - 2 Real Madrid/chunk_18/chunk_18.mp3
+F:/video_classification/2016-03-13 - 22-30 Las Palmas 1 - 2 Real Madrid/chunk_21/chunk_21.mp3
+F:/video_classification/2016-03-13 - 22-30 Las Palmas 1 - 2 Real Madrid/chunk_23/chunk_23.mp3
+F:/video_classification/2016-03-13 - 22-30 Las Palmas 1 - 2 Real Madrid/chunk_28/chunk_28.mp3
+F:/video_classification/2016-03-13 - 22-30 Las Palmas 1 - 2 Real Madrid/chunk_37/chunk_37.mp3
+F:/video_classification/2016-03-13 - 22-30 Las Palmas 1 - 2 Real Madrid/chunk_38/chunk_38.mp3
+F:/video_classification/2016-03-13 - 22-30 Las Palmas 1 - 2 Real Madrid/chunk_39/chunk_39.mp3
+F:/video_classification/2016-03-13 - 22-30 Las Palmas 1 - 2 Real Madrid/chunk_46/chunk_46.mp3
+F:/video_classification/2016-03-13 - 22-30 Las Palmas 1 - 2 Real Madrid/chunk_53/chunk_53.mp3
+F:/video_classification/2016-03-13 - 22-30 Las Palmas 1 - 2 Real Madrid/chunk_58/chunk_58.mp3
+F:/video_classification/2016-03-13 - 22-30 Las Palmas 1 - 2 Real Madrid/chunk_62/chunk_62.mp3
+F:/video_classification/2016-03-13 - 22-30 Las Palmas 1 - 2 Real Madrid/chunk_64/chunk_64.mp3
+F:/video_classification/2016-03-13 - 22-30 Las Palmas 1 - 2 Real Madrid/chunk_65/chunk_65.mp3
+F:/video_classification/2016-03-13 - 22-30 Las Palmas 1 - 2 Real Madrid/chunk_80/chunk_80.mp3
+F:/video_classification/2016-03-13 - 22-30 Las Palmas 1 - 2 Real Madrid/chunk_82/chunk_82.mp3
+F:/video_classification/2016-03-13 - 22-30 Las Palmas 1 - 2 Real Madrid/chunk_86/chunk_86.mp3
+F:/video_classification/2016-03-13 - 22-30 Las Palmas 1 - 2 Real Madrid/chunk_90/chunk_90.mp3

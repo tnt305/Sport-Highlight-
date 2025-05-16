@@ -16,12 +16,12 @@ from scipy.sparse import csr_matrix
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))  # Lên 3 cấp đến v5
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
-from utils import read_config, AverageMeter
-from datasets.datamanager import DataManager
+# from utils import read_config, AverageMeter
+from short_sport.video_trainer.datasets.datamanager import DataManager
 from short_sport.video_trainer.architecture.sub_modules.matrix import compute_cooccurrence
-from losses.loss import BinaryFocalLoss, TwoWayLoss, AsymmetricLossOptimized, CalibratedRankingLoss, CorrelationAwareLoss, MultiLabelCCE
+from short_sport.video_trainer.losses.loss import BinaryFocalLoss, TwoWayLoss, AsymmetricLossOptimized, CalibratedRankingLoss, CorrelationAwareLoss, MultiLabelCCE
 # import logging
-from logger import Logging
+from short_sport.video_trainer.logger import Logging
 # Set the PYTORCH_CUDA_ALLOC_CONF environment variable
 os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'max_split_size_mb:50'
 
@@ -32,7 +32,7 @@ def create_default_config(args):
             'name': args.model,
             'total_length': args.total_length,
             'num_classes': 18,  # Sẽ được cập nhật sau khi load dataset
-            'pretrained': 'facebook/timesformer-hr-finetuned-k600',
+            'pretrained': 'uniformer',
             'gnn': {
                 'in_channels': 768,
                 'out_channels': 256,
@@ -66,15 +66,14 @@ def create_default_config(args):
             ]
         },
         'training': {
-            'epochs': args.epochs,
+            'n_epochs': args.epochs,
             'max_steps': args.max_steps,
             'gradient_accumulation_steps': args.gradient_accumulation_steps,
             'seed': args.seed,
             'loss_function': args.loss_function,
             'optimizer': {
-                'type': 'AdamW',
+                'type': 'Adam',
                 'lr': 0.00001,
-                'weight_decay': 0.01
             },
             'scheduler': {
                 'type': 'cosine_with_warmup',
@@ -186,9 +185,9 @@ def main(config, args):
                 criterion = nn.MultiLabelMarginLoss()
             elif config['training']['loss_function'] == 'bce_with_logits':
                 criterion = nn.BCEWithLogitsLoss()
-            elif config['training']['loss_function'] == 'rank_bce':
-                cooccur = compute_cooccurrence(train_loader, len(class_list))
-                criterion = CorrelationAwareLoss(cooccur, base_loss=nn.BCEWithLogitsLoss(), alpha=0.3)
+            # elif config['training']['loss_function'] == 'rank_bce':
+            #     cooccur = compute_cooccurrence(train_loader, len(class_list))
+            #     criterion = CorrelationAwareLoss(cooccur, base_loss=nn.BCEWithLogitsLoss(), alpha=0.3)
             elif config['training']['loss_function'] == 'cce':
                 criterion = MultiLabelCCE()
                 
@@ -199,23 +198,41 @@ def main(config, args):
                 'mAP': MultilabelAveragePrecision(num_labels=num_classes, average='macro'),
                 'Acc': MultilabelAccuracy(num_labels=num_classes, average='macro'),
                 'weighted Accuracy': MultilabelAccuracy(num_labels=num_classes, average='micro'),
-                'weighted v1 mAP': MultilabelAveragePrecision(num_labels=num_classes, average='micro')
+                'micro v1 mAP': MultilabelAveragePrecision(num_labels=num_classes, average='micro'),
+                'weighted v1 mAP': MultilabelAveragePrecision(num_labels=num_classes, average='weighted')
             }
-        # modeltest_transforms
-        # Khởi tạo model
+
         model_args = (
-            train_loader, val_loader, test_loader, criterion, eval_metrics, class_list,
-            config['training']['test_every'], config['training']['distributed'], device,
-            config['training']['max_steps'], config['training']['gradient_accumulation_steps'], logger
-        )
+            train_loader, test_loader, criterion, eval_metrics, class_list,
+            config['training']['test_every'], config['training']['optimizer']['lr'],
+            config['training']['distributed'], device, logger,
+        ) #config['training']['n_epochs']
         
         ## Model chose
         if config['model']['name'] == 'timesformer':
-            from classifier import TimeSformerExecutor
+            from short_sport.video_trainer.classifier import TimeSformerExecutor
             executor = TimeSformerExecutor(*model_args)
+        # if config['model']['name'] == 'timesformer_epoch_based':
+        #     from short_sport.video_trainer.classifier import TimeSformerEpochBasedExecutor
+        #     executor = TimeSformerEpochBasedExecutor(*model_args)
+        if config['model']['name'] == 'timesformer_epoch_based_with_augment':
+            from short_sport.video_trainer.classifier import TimeSformerEpochBasedWithAugmentationExecutor
+            executor = TimeSformerEpochBasedWithAugmentationExecutor(*model_args)
+        if config['model']['name'] == 'timesformer_epoch_based_with_augment_rope':
+            from short_sport.video_trainer.classifier import TimeSformerEpochBasedWithAugmentationRoPEExecutor
+            executor = TimeSformerEpochBasedWithAugmentationRoPEExecutor(*model_args)
+        if config['model']['name'] == 'va_harder_fusion':
+            from short_sport.video_trainer.classifier import VAHarderFusionExecuter
+            executor = VAHarderFusionExecuter(*model_args)
         if config['model']['name'] == 'timesformer_gnn':
             from classifier import TimeSformerGNNExecutor
             executor = TimeSformerGNNExecutor(*model_args)
+        if config["model"]["name"] == "va_fusion":
+            from short_sport.video_trainer.classifier import VAFusionExecuter
+            executor = VAFusionExecuter(*model_args)
+        if config["model"]["name"] == "uniformer_va_fusion":
+            from short_sport.video_trainer.classifier import UniformerVAFusionExecuter
+            executor = UniformerVAFusionExecuter(*model_args)
         elif config['model']['name'] == 'videomae':
             from classifier import VideoMaeExecutor
             executor = VideoMaeExecutor(*model_args)
@@ -224,12 +241,16 @@ def main(config, args):
             executor = TimeSformerCLIPInitExecutor(*model_args) 
         # executor.model.to(device)
         logger.info('Start training')
-        executor.run_training()
+        
+        executor.train(args.epoch_start, args.epochs) 
+        # except: 
+        #     executor.run_training()
         try:
             eval = executor.test()
             mlflow.log_metrics({
                 'mAP': float(eval['mAP']) * 100,
                 'Acc': float(eval['Acc']) * 100,
+                'micro v1 mAP': float(eval['weighted v1 mAP']) * 100,
                 'weighted v1 mAP': float(eval['weighted v1 mAP']) * 100
             })
         except Exception as e:
@@ -240,10 +261,11 @@ def main(config, args):
         executor.save(model_path)
         mlflow.log_artifact(model_path)
         mlflow.log_artifact(log_file)
-        mlflow.log_artifact("config.yaml")
+        mlflow.log_artifact(f"config/config_{config['model']['name']}.yaml")
     
         logger.info(f"MultiLabel Average Precision: {float(eval['mAP']) * 100:.3f}")
         logger.info(f"MultiLabel Accuracy: {float(eval['Acc']) * 100:.3f}")
+        logger.info(f"Micro Average Precision: {eval['micro v1 mAP'] * 100:.3f}")
         logger.info(f"Mean Average Precision: {eval['weighted v1 mAP'] * 100:.3f}")
         
 if __name__ == '__main__':
@@ -251,21 +273,21 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Training script for action recognition")
     parser.add_argument("--seed", default = 1, type=int, help="Seed for Numpy and PyTorch. Default: -1 (None)")
     parser.add_argument("--epoch_start", default=0, type=int, help="Epoch to start learning from, used when resuming")
-    parser.add_argument("--epochs", default= 1, type=int, help="Total number of epochs")
+    parser.add_argument("--epochs", default= 3, type=int, help="Total number of epochs")
     parser.add_argument("--dataset", default="tv360", help="Dataset: volleyball, hockey, charades, ava, animalkingdom")
-    parser.add_argument("--model", default="timesformer_gnn")
-    parser.add_argument("--total_length", default= 30,type=int, help="Number of frames in a video")
+    parser.add_argument("--model", default="uniformer_va_fusion")
+    parser.add_argument("--total_length", default= 16,type=int, help="Number of frames in a video")
     parser.add_argument("--batch_size", default= 2,type=int, help="Size of the mini-batch")
-    parser.add_argument("--max_steps", default= 6000,type=int, help="Number of frames in a video") 
+    parser.add_argument("--max_steps", default= 12000,type=int, help="Number of frames in a video") 
     parser.add_argument("--gradient_accumulation_steps", default= 4,type=int, help="Number of frames in a video") 
     parser.add_argument("--id", default="", help="Additional string appended when saving the checkpoints")
     parser.add_argument("--checkpoint", default="", help="location of a checkpoint file, used to resume training")
-    parser.add_argument("--num_workers", default = 10, type=int, help="Number of torchvision workers used to load data (default: 8)")
-    parser.add_argument("--test_every", default=1, type=int, help="Test the model every this number of epochs")
+    parser.add_argument("--num_workers", default = 15, type=int, help="Number of torchvision workers used to load data (default: 8)")
+    parser.add_argument("--test_every", default= 1, type=int, help="Test the model every this number of epochs")
     parser.add_argument("--gpu", default="0", type=str, help="GPU id in case of multiple GPUs")
     parser.add_argument("--distributed", default=False, type=bool, help="Distributed training flag")
     parser.add_argument("--train", default=True, type=bool, help="train or test")
-    parser.add_argument("--loss_function", default = "cce", help = "Los function")
+    parser.add_argument("--loss_function", default = "bce_with_logits", help = "Los function")
     parser.add_argument("--config", default=None, help="Custom config file name (e.g., timesformer.yaml)")
     args = parser.parse_args()
     

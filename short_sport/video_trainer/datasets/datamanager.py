@@ -173,7 +173,7 @@ class DataManager():
             "Yellow card": 14,
             "Red card": 15,
             "Yellow->red card": 16,
-            "Event not recognized": 17
+            "Not Event": 17
         }
         if self.dataset == "tv360": 
             return tv360_dict
@@ -243,7 +243,7 @@ class DataManager():
         else:
             raise Exception("[ERROR] The dataset " + str(self.dataset) + " is not supported!")
         
-        train_loader = DataLoader(train_data, batch_size=self.batch_size, shuffle=shuffle, num_workers=self.num_workers, sampler=sampler, pin_memory=False, drop_last=drop_last)
+        train_loader = DataLoader(train_data, batch_size=self.batch_size, shuffle=shuffle, num_workers=self.num_workers, sampler=sampler, pin_memory=True, drop_last=drop_last)
         return train_loader
     
     def get_test_loader(self, test_transform, drop_last=False, mode='test'):

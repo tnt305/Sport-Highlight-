@@ -241,18 +241,26 @@ def round_down_to_minute(time_str):
     
     return rounded_obj.strftime("%M:%S")
 
-def round_down_to_minute_v2(time_str):
+# def round_down_to_minute_v2(time_str):
+#     time_obj = datetime.strptime(time_str, "%M:%S")
+#     result_time = time_obj + timedelta(minutes=45)
+    
+#     # Handle case where minutes overflow to hours
+#     total_minutes = result_time.hour * 60 + result_time.minute
+#     rounded_minutes = total_minutes  # Keep total minutes as is
+#     # seconds = result_time.second
+    
+#     # Format back to "MM:SS"
+#     formatted_result = f"{rounded_minutes}:00"
+    
+#     return formatted_result
+
+def round_down_to_minute_v2(time_str, first_half_end_minutes):
     time_obj = datetime.strptime(time_str, "%M:%S")
-    result_time = time_obj + timedelta(minutes=45)
-    
-    # Handle case where minutes overflow to hours
-    total_minutes = result_time.hour * 60 + result_time.minute
-    rounded_minutes = total_minutes  # Keep total minutes as is
-    # seconds = result_time.second
-    
-    # Format back to "MM:SS"
-    formatted_result = f"{rounded_minutes}:00"
-    
+    # Add 45 minutes plus an offset based on the first half's end
+    offset_minutes = first_half_end_minutes + 1  # Start second half 1 minute after first half ends
+    total_minutes = time_obj.hour * 60 + time_obj.minute + offset_minutes
+    formatted_result = f"{total_minutes}:00"
     return formatted_result
 
 

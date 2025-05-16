@@ -22,6 +22,7 @@ class BinaryFocalLoss(nn.Module):
             return focal_loss.sum()
 
 
+
 nINF = -100
 
 class TwoWayLoss(nn.Module):

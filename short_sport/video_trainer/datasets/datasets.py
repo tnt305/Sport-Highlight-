@@ -6,7 +6,7 @@ from PIL import Image
 import pandas
 from torch.utils.data import Dataset
 from itertools import compress
-from logger import Logging
+from short_sport.video_trainer.logger import Logging
 import pickle
 import os
 import sys
@@ -38,9 +38,9 @@ class VideoAnnotations(object):
     def label(self):
         return self._row[2]
     
-    # @property
-    # def audio(self):
-    #     return self._row[3]
+    @property
+    def audio(self):
+        return self._row[3]
     
 class ActionSpottingDataset(Dataset):
     def __init__(self, total_length):
@@ -96,7 +96,7 @@ class TV360Dataset(ActionSpottingDataset):
         # elif self.mode == 'test':
         #     self.set = 0.1
         
-        self.annotations = normalize_path(os.path.join(self.path, 'timesformer_v2.csv'))
+        self.annotations = normalize_path(os.path.join(self.path, 'event_va_dataset.csv'))
             
         #act_dict
         self.label2id = label2id
@@ -133,14 +133,14 @@ class TV360Dataset(ActionSpottingDataset):
             reader = csv.DictReader(f, delimiter=';')
             for row in tqdm(reader, desc='Reading annotations'):
                 ovid = row['video_id']
-                labels = row['labels']
-                # audio = row['audio_id']
-                path = os.path.join("/".join(ovid.split("/")[:-1]), 'frames')
+                labels = row['label']
+                audio = row['audio_id']
+                path = os.path.join("/".join(ovid.split("/")[:-1]), 'frames') #"/".join(ovid.split("/")[:-1])
                 files = sorted(os.listdir(path))
                 file_list += [files]
                 count = len(files)
                 labels = [int(l) for l in labels.split(',')]
-                video_list += [VideoAnnotations([path, count, labels])]
+                video_list += [VideoAnnotations([path, count, labels, audio])]
         
         video_list, file_list = self._split_dataset(video_list, file_list)
 
@@ -165,21 +165,38 @@ class TV360Dataset(ActionSpottingDataset):
         elif self.mode == 'test':
             return video_list[train_size + val_size:], file_list[train_size + val_size:]
     
+    # def _get(self, record, img_names, indices):
+    #     images = list()
+    #     for idx in indices:
+    #         try:
+    #             img = self._load_image(record.path, img_names[idx])
+    #         except:
+    #             print('ERROR: Could not read image "{}"'.format(os.path.join(record.path, img_names[idx])))
+    #             print('invalid indices: {}'.format(indices))
+    #             raise
+    #         images.extend(img)
     def _get(self, record, img_names, indices):
         images = list()
+        # for idx in indices:
+        #     if idx >= len(img_names) or idx < 0:
+        #         print(f'ERROR: Index {idx} is out of bounds for img_names of length {len(img_names)}')
+        #         print(f'invalid indices: {indices}')
+        #         raise IndexError(f'Index {idx} is out of bounds for img_names of length {len(img_names)}')
+
         for idx in indices:
             try:
                 img = self._load_image(record.path, img_names[idx])
-            except:
-                print('ERROR: Could not read image "{}"'.format(os.path.join(record.path, img_names[idx])))
-                print('invalid indices: {}'.format(indices))
-                raise
+            except Exception as e:
+                print(f'ERROR: Could not read image at index {idx} from {record.path}')
+                print(f'Path: {os.path.join(record.path, img_names[idx])}')
+                print(f'invalid indices: {indices}')
+                raise e
             images.extend(img)
-            
+
         process_data = self.transform(images)
-        # audio_path = record.audio
+        audio_path = record.audio
         process_data = process_data.view((self.total_length, -1) + process_data.size()[-2:])
         label = numpy.zeros(self.num_classes)  # need to fix this hard number
         label[record.label] = 1.0
-        return process_data, label
+        return process_data, audio_path, label
     

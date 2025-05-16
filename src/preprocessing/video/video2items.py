@@ -115,13 +115,13 @@ class VideoProcessor:
                    segment_duration,
                    overlapping: int,
                    do_sep=True):
-        logger.info(f'Đây là output_dir for ffmpeg: {output_dir}')
+        # logger.info(f'Đây là output_dir for ffmpeg: {output_dir}')
         probe = ffmpeg.probe(input_file)
         video_duration = math.ceil(float(probe['format']['duration']))
         # 2*(video_duration / segment_duration) - 1 for formulation
         num_segments = math.ceil((video_duration / segment_duration))
         # testcase
-        logger.info(f"Đang xử lý {input_file}")
+        # logger.info(f"Đang xử lý {input_file}")
         # start time offset xử lý vấn đề về sự thay đổi trong hiệp 1 và hiệp 2
         if input_file.split("/")[-1].startswith("2_"):
     
@@ -167,8 +167,7 @@ class VideoProcessor:
                 output_audio = f"{chunk_dir}/audio_{i+start_time_offset}_start_{start_time_for_audio}_end_{int(start_time_for_audio + durationv2)}.wav"
                 frames_dir = f"{chunk_dir}/frames"
                 # Generate audio file from chunk (retain original quality)                
-                create_audio_chunk(input_file, output_audio,
-                                   start_time_for_audio, durationv2)
+                # create_audio_chunk(input_file, output_audio, start_time_for_audio, durationv2)
                 # Extract frames from video chunk
                 video2frames(output_file, frames_dir, 2)
 
@@ -182,7 +181,7 @@ class VideoProcessor:
                             self.config.segment_duration,
                             self.config.overlapping,
                             do_sep)
-            logger.info(f"Đã chia video cho HIỆP_I thành các đoạn trong thư mục: {self.config.output_dir}")
+            # logger.info(f"Đã chia video cho HIỆP_I thành các đoạn trong thư mục: {self.config.output_dir}")
 
             input_for_2nd_half = normalize_path(os.path.join("/".join(self.config.input_file.split("/")[:-1]), "2_224p.mkv"))
             self.ffmpeg_cmd(input_for_2nd_half,
@@ -190,7 +189,7 @@ class VideoProcessor:
                             self.config.segment_duration,
                             self.config.overlapping,
                             do_sep)
-            logger.info(f"Đã chia video cho HIỆP_II thành các đoạn trong thư mục: {self.config.output_dir}")
+            # logger.info(f"Đã chia video cho HIỆP_II thành các đoạn trong thư mục: {self.config.output_dir}")
     
     @classmethod
     def post_process(cls, game_path):
@@ -216,7 +215,7 @@ class VideoProcessor:
             #     os.makedirs(new_game_path, exist_ok=True)
         
             # Check if the path does not exist
-            path_does_not_exist = not (game_name == "1_224.mkv" or game_name == "2_224.mkv")
+            path_does_not_exist = not (game_name == "1_224p.mkv" or game_name == "2_224p.mkv")
             # Check if the path does not end with the specified extensions
             invalid_extension = not (
                 new_game_path.endswith(".mkv") or 
